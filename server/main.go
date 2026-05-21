@@ -18,21 +18,31 @@ func getHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    http.HandleFunc("/", getRoot)
-    http.HandleFunc("/hello", getHello)
-    
-    err := http.ListenAndServe(":3333", nil)
+    mux := http.NewServeMux() 
+	// using an explicit server multiplexer 
+	// default one can quickly be populated by other servers
+    mux.HandleFunc("/", getRoot)
+    mux.HandleFunc("/hello", getHello)
+
+    err := http.ListenAndServe(":3333", mux)
+
+	if errors.Is(err, http.ErrServerClosed) {
+        fmt.Printf("server closed\n")
+    } else if err != nil {
+        fmt.Printf("error starting server: %s\n", err)
+        os.Exit(1)
+    }
 
 }
 
 // ALTERNATIVE
-type helloHandler struct {
-    db *sql.DB
-}
+// type helloHandler struct {
+//     db *sql.DB
+// }
 
-// receiver that takes in a state
-func (h *helloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hello from a handler with a DB connection!")
-}
-// we can then use our handler in listen and serve as it counts as a Handler
-http.ListenAndServe(":8080", &helloHandler{db: myDB})
+// // receiver that takes in a state
+// func (h *helloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+//     fmt.Fprintf(w, "Hello from a handler with a DB connection!")
+// }
+// // we can then use our handler in listen and serve as it counts as a Handler
+// http.ListenAndServe(":8080", &helloHandler{db: myDB})
