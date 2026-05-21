@@ -20,7 +20,7 @@ func getHello(w http.ResponseWriter, r *http.Request) {
 func main() {
     mux := http.NewServeMux() 
 	// using an explicit server multiplexer 
-	// default one can quickly be populated by other servers
+	// default one can quickly be populated with other servers
     mux.HandleFunc("/", getRoot)
     mux.HandleFunc("/hello", getHello)
 
@@ -35,7 +35,7 @@ func main() {
 
 }
 
-// ALTERNATIVE
+// ALTERNATIVE TO ADD STATE
 // type helloHandler struct {
 //     db *sql.DB
 // }
