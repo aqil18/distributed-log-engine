@@ -13,11 +13,13 @@ const (
     ERROR                // 3
 )
 
+// serialize bytes of log entry
 func serialize() {
 	data := entry.Message
 	checksum := crc32.ChecksumIEEE(data)
 }
 
+// append [4-byte length][4-byte checksum][payload bytes] to binary file
 func appendEntry(entry LogEntry) {
 	binary.Write(w, binary.LittleEndian, uint32(len(data)))
 	binary.Write(w, binary.LittleEndian, checksum)
