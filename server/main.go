@@ -17,16 +17,6 @@ func getHello(w http.ResponseWriter, r *http.Request) {
     io.WriteString(w, "Hello, HTTP!\n")
 }
 
-func getHello(w http.ResponseWriter, r *http.Request) {
-    fmt.Printf("got /appendentry request\n")
-    io.WriteString(w, "Hello, HTTP!\n")
-}
-
-func getHello(w http.ResponseWriter, r *http.Request) {
-    fmt.Printf("got /hello request\n")
-    io.WriteString(w, "Hello, HTTP!\n")
-}
-
 
 func main() {
     mux := http.NewServeMux() 

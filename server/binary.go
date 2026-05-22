@@ -3,9 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"hash/crc32"
+	"io"
 	"log"
 	"os"
+	"time"
 )
 
 type LogEntry struct {
@@ -32,25 +35,13 @@ func serialize(entry LogEntry) []byte {
 }
 
 // deserialize into logentry
-func deserialize(buf []byte, messageLength uint32) LogEntry {
-	var entry LogEntry
-	var Timestamp int64
-	var Level uint8
-	var Message []byte
-	err := binary.Read(buf, binary.LittleEndian, &Timestamp)
-	err := binary.Read(buf, binary.LittleEndian, &Level)
-	Message = buf[10:messageLength]
-
-	var entry LogEntry
-	LogEntry.Timestamp = Timestamp
-	LogEntry.Level = Level
-	LogEntry.Message = Message
-	
-
-	if err != nil {
-		fmt.Println("Read failed:", err)
-	}
-	return entry
+func deserialize(data []byte) LogEntry {
+    r := bytes.NewReader(data)
+    var entry LogEntry
+    binary.Read(r, binary.LittleEndian, &entry.Timestamp) // reads 8 bytes
+    binary.Read(r, binary.LittleEndian, &entry.Level)     // reads 1 byte
+    entry.Message = data[9:]                              // everything after
+    return entry
 }
 
 func checksum(entry LogEntry) uint32 {
@@ -69,6 +60,17 @@ func appendEntry(entry LogEntry) {
 	binary.Write(file, binary.LittleEndian, uint32(len(data)))
 	binary.Write(file, binary.LittleEndian, checksum(entry))
 	file.Write(data)
+}
+
+
+func writeEntry(message string, level uint8) error {
+	entry := LogEntry{
+		Timestamp: time.Now().UnixNano(),
+		Level:     level,
+		Message:   []byte(message),
+	}
+	appendEntry(entry)
+	return nil
 }
 
 // read at offset
@@ -98,3 +100,19 @@ func readEntry(offset int64) (LogEntry, error) {
 }
 
 
+
+func main() {
+	writeEntry("This is an important log", 2)
+	writeEntry("This is not so important and is more informational", 1)
+	data, err := readEntry(0)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(data.Message))
+	data, err = readEntry(41)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(data.Message))
+
+}
