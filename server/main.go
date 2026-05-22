@@ -17,12 +17,26 @@ func getHello(w http.ResponseWriter, r *http.Request) {
     io.WriteString(w, "Hello, HTTP!\n")
 }
 
+func getHello(w http.ResponseWriter, r *http.Request) {
+    fmt.Printf("got /appendentry request\n")
+    io.WriteString(w, "Hello, HTTP!\n")
+}
+
+func getHello(w http.ResponseWriter, r *http.Request) {
+    fmt.Printf("got /hello request\n")
+    io.WriteString(w, "Hello, HTTP!\n")
+}
+
+
 func main() {
     mux := http.NewServeMux() 
 	// using an explicit server multiplexer 
 	// default one can quickly be populated with other servers
     mux.HandleFunc("/", getRoot)
     mux.HandleFunc("/hello", getHello)
+	mux.HandleFunc("/appendentry" , appendEntry)
+	mux.HandleFunc("/readentry" , readentry)
+
 
     err := http.ListenAndServe(":3333", mux)
 
