@@ -1,5 +1,7 @@
 package main
 
+
+
 import (
     "errors"
     "fmt"
@@ -15,6 +17,27 @@ func getRoot(w http.ResponseWriter, r *http.Request) {
 func getHello(w http.ResponseWriter, r *http.Request) {
     fmt.Printf("got /hello request\n")
     io.WriteString(w, "Hello, HTTP!\n")
+}
+
+
+
+func appendEntry(w http.ResponseWriter, r *http.Request) {
+    fmt.Printf("got /hello request\n")
+    io.WriteString(w, "Hello, HTTP!\n")
+
+    // Parse request to find entry and call appendEntry
+    LogEntry entry
+    appendEntry(entry)
+}
+
+func readEntry(w http.ResponseWriter, r *http.Request) {
+    fmt.Printf("got /hello request\n")
+    io.WriteString(w, "Hello, HTTP!\n")
+
+    // Parse request to find entry index and call readEntryByIndex
+    
+    readEntryByIndex(0)
+    LogEntry entry
 }
 
 

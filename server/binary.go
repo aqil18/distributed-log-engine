@@ -144,7 +144,7 @@ func main() {
 	writeEntry("This is an important log", 2)
 	writeEntry("This is not so important and is more informational", 1)
 
-	data, err := readEntryByIndex(0)
+	data, err := readEntryByIndex(7)
 	if err != nil {
 		log.Fatal(err)
 	}
