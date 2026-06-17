@@ -21,25 +21,29 @@ func getHello(w http.ResponseWriter, r *http.Request) {
 
 
 
-func appendEntry(w http.ResponseWriter, r *http.Request) {
-    fmt.Printf("got /hello request\n")
-    io.WriteString(w, "Hello, HTTP!\n")
 
-    // Parse request to find entry and call appendEntry
-    LogEntry entry
-    appendEntry(entry)
-}
 
 func readEntry(w http.ResponseWriter, r *http.Request) {
-    fmt.Printf("got /hello request\n")
-    io.WriteString(w, "Hello, HTTP!\n")
+    fmt.Printf("got /readEntry request\n")
+    io.WriteString(w, "Reading entry!\n")
 
     // Parse request to find entry index and call readEntryByIndex
-    
-    readEntryByIndex(0)
-    LogEntry entry
+    body, _ := io.ReadAll(r.Body)
+	// fmt.Println("Status:", r.Status)
+	fmt.Println("Body:", string(body))
+    // readEntryByIndex(0)
+    // LogEntry entry
 }
 
+
+// func appendEntry(w http.ResponseWriter, r *http.Request) {
+//     fmt.Printf("got /hello request\n")
+//     io.WriteString(w, "Hello, HTTP!\n")
+
+//     // Parse request to find entry and call appendEntry
+//     LogEntry entry
+//     appendEntry(entry)
+// }
 
 func main() {
     mux := http.NewServeMux() 
@@ -47,8 +51,8 @@ func main() {
 	// default one can quickly be populated with other servers
     mux.HandleFunc("/", getRoot)
     mux.HandleFunc("/hello", getHello)
-	mux.HandleFunc("/appendentry" , appendEntry)
-	mux.HandleFunc("/readentry" , readentry)
+	mux.HandleFunc("/readEntry" , readEntry)
+	// mux.HandleFunc("/appendentry" , appendEntry)
 
 
     err := http.ListenAndServe(":3333", mux)
