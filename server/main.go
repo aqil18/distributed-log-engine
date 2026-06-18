@@ -86,6 +86,7 @@ func main() {
         },
     }
 
+    // Kicks off a go routine for server 1 and 2 and they run concurrently
     go func() {
         err := serverOne.ListenAndServe()
         if errors.Is(err, http.ErrServerClosed) {
@@ -107,7 +108,6 @@ func main() {
         cancelCtx()
     }()
     
-
     // This is to do with channel management - look into this
     <-ctx.Done()
 }
