@@ -3,15 +3,23 @@ package main
 
 
 import (
+    "context"
     "errors"
     "fmt"
     "io"
+    "net"
     "net/http"
     "os"
 )
 
+const keyServerAddr = "serverAddr"
+
+
 func getRoot(w http.ResponseWriter, r *http.Request) {
-    fmt.Printf("got / request\n")
+    ctx := r.Context()
+
+    // key value lookup of serverAddr in context    
+    fmt.Printf("%s: got / request\n", ctx.Value(keyServerAddr))
     io.WriteString(w, "This is my website!\n")
 }
 func getHello(w http.ResponseWriter, r *http.Request) {
@@ -27,13 +35,15 @@ func readEntry(w http.ResponseWriter, r *http.Request) {
     fmt.Printf("got /readEntry request\n")
     io.WriteString(w, "Reading entry!\n")
 
-    // Parse request to find entry index and call readEntryByIndex
-    body, _ := io.ReadAll(r.Body)
-	// fmt.Println("Status:", r.Status)
-	fmt.Println("Body:", string(body))
-    // readEntryByIndex(0)
-    // LogEntry entry
+    body, err := io.ReadAll(r.Body)
+    if err != nil {
+        fmt.Printf("could not read body: %s\n", err)
+    }
+
+    fmt.Printf("%s: got / request. body:\n%s\n",
+        body)
 }
+
 
 
 // func appendEntry(w http.ResponseWriter, r *http.Request) {
@@ -55,15 +65,51 @@ func main() {
 	// mux.HandleFunc("/appendentry" , appendEntry)
 
 
-    err := http.ListenAndServe(":3333", mux)
-
-	if errors.Is(err, http.ErrServerClosed) {
-        fmt.Printf("server closed\n")
-    } else if err != nil {
-        fmt.Printf("error starting server: %s\n", err)
-        os.Exit(1)
+    ctx, cancelCtx := context.WithCancel(context.Background())
+    serverOne := &http.Server{
+        Addr:    ":3333",
+        Handler: mux,
+        BaseContext: func(l net.Listener) context.Context {
+            // create a context and add the keyServerAddr and address to it
+            ctx = context.WithValue(ctx, keyServerAddr, l.Addr().String())
+            return ctx
+        },
     }
 
+
+    serverTwo := &http.Server{
+        Addr:    ":4444",
+        Handler: mux,
+        BaseContext: func(l net.Listener) context.Context {
+            ctx = context.WithValue(ctx, keyServerAddr, l.Addr().String())
+            return ctx
+        },
+    }
+
+    go func() {
+        err := serverOne.ListenAndServe()
+        if errors.Is(err, http.ErrServerClosed) {
+            fmt.Printf("server one closed\n")
+        } else if err != nil {
+            fmt.Printf("error listening for server one: %s\n", err)
+        }
+    
+        cancelCtx()
+    }()
+
+    go func() {
+    err := serverTwo.ListenAndServe()
+    if errors.Is(err, http.ErrServerClosed) {
+        fmt.Printf("server two closed\n")
+    } else if err != nil {
+        fmt.Printf("error listening for server two: %s\n", err)
+    }
+        cancelCtx()
+    }()
+    
+
+    // This is to do with channel management - look into this
+    <-ctx.Done()
 }
 
 // ALTERNATIVE TO ADD STATE
