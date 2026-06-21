@@ -9,7 +9,6 @@ import (
     "io"
     "net"
     "net/http"
-    "os"
 )
 
 const keyServerAddr = "serverAddr"
